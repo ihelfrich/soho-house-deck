@@ -388,7 +388,7 @@ function drawPrice(){
 function drawArpu(){
   const svg=document.getElementById('arpuChart'), W=900,H=380,pad=64;
   const yr=['FY2022','FY2023','FY2024'];
-  const dues=[100,109,117], inh=[100,97,91];
+  const dues=[100,109,117], inh=[100,94,86];
   const yMin=82,yMax=122;
   const x=k=>pad+k*((W-pad*2)/2);
   const y=v=>H-pad-((v-yMin)/(yMax-yMin))*(H-pad*2);
@@ -407,7 +407,7 @@ function drawArpu(){
     return o;
   }
   s+=line(dues,'#432d38','Dues per member  +17%',y(117)-16);
-  s+=line(inh,'#d06b55','In-house spend per member  -9%',y(91)+26);
+  s+=line(inh,'#d06b55','In-house spend per member  -14%',y(86)+26);
   yr.forEach((t,k)=>s+=`<text x="${x(k)}" y="${H-26}" fill="#8a8088" font-size="13" text-anchor="middle">${t}</text>`);
   svg.innerHTML=s;
 }
