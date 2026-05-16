@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Soho House: A Forensic Investigation — Dr. Ian Helfrich</title>
+<meta name="description" content="An independent, primary-source forensic investigation into Soho House & Co.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+:root{
+  --aubergine:#432d38; --aubergine-deep:#241820; --sage:#819a9c; --sage-deep:#566c6d;
+  --terracotta:#d06b55; --gold:#c9a847; --cream:#fffaf5; --cream-2:#f1ece4;
+  --ink:#17181a; --dim:#8a8088;
+  --serif:"Newsreader",Georgia,serif; --sans:"Inter",-apple-system,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--aubergine-deep);
+  font-family:var(--sans);-webkit-font-smoothing:antialiased}
+
+/* ---- slide frame ---- */
+.slide{
+  position:fixed;inset:0;display:flex;flex-direction:column;justify-content:center;
+  padding:7vh 9vw;opacity:0;pointer-events:none;
+  transform:translateY(28px) scale(.99);
+  transition:opacity .55s ease,transform .55s cubic-bezier(.2,.7,.2,1);
+}
+.slide.active{opacity:1;pointer-events:auto;transform:none;}
+.slide.prev{transform:translateY(-28px) scale(.99);}
+.slide.light{background:var(--cream);color:var(--ink)}
+.slide.dark{background:var(--aubergine-deep);color:var(--cream)}
+.slide.aubergine{background:var(--aubergine);color:var(--cream)}
+.slide.sage{background:var(--sage-deep);color:var(--cream)}
+
+/* ---- staggered entrance ---- */
+.reveal{opacity:0;transform:translateY(20px);
+  transition:opacity .6s ease,transform .6s cubic-bezier(.2,.7,.2,1);}
+.slide.active .reveal{opacity:1;transform:none;}
+.slide.active .reveal:nth-child(1){transition-delay:.12s}
+.slide.active .reveal:nth-child(2){transition-delay:.22s}
+.slide.active .reveal:nth-child(3){transition-delay:.34s}
+.slide.active .reveal:nth-child(4){transition-delay:.46s}
+.slide.active .reveal:nth-child(5){transition-delay:.58s}
+.slide.active .reveal:nth-child(6){transition-delay:.70s}
+
+/* ---- typography ---- */
+.kicker{font-size:clamp(11px,1.3vw,15px);font-weight:600;letter-spacing:3px;
+  text-transform:uppercase;margin-bottom:3vh}
+.light .kicker{color:var(--terracotta)} .dark .kicker,.aubergine .kicker{color:var(--gold)}
+.sage .kicker{color:var(--cream)}
+h1{font-family:var(--serif);font-weight:500;font-size:clamp(40px,7vw,104px);
+  line-height:1.02;letter-spacing:-0.5px}
+h1 em{font-style:italic}
+.dark h1 em,.aubergine h1 em{color:var(--sage)} .light h1 em{color:var(--terracotta)}
+h2{font-family:var(--serif);font-weight:500;font-size:clamp(28px,4.6vw,60px);
+  line-height:1.1;letter-spacing:-0.3px;margin-bottom:3vh;max-width:18em}
+.lead{font-family:var(--serif);font-size:clamp(20px,2.5vw,36px);line-height:1.4;
+  max-width:23em}
+.light .lead{color:#4a4048} .dark .lead,.aubergine .lead{color:rgba(255,250,245,.82)}
+.sage .lead{color:rgba(255,250,245,.94)}
+p{font-size:clamp(15px,1.7vw,22px);line-height:1.6;max-width:34em;margin:1.6vh 0}
+.light p{color:#4a4048} .dark p,.aubergine p,.sage p{color:rgba(255,250,245,.82)}
+strong{font-weight:600}
+.light strong{color:var(--aubergine)} .dark strong,.aubergine strong,.sage strong{color:var(--gold)}
+em{font-style:italic}
+ul{margin:1vh 0 0 1.2em;max-width:33em;list-style:none}
+li{font-size:clamp(15px,1.7vw,22px);line-height:1.5;margin:1.7vh 0;position:relative}
+li::before{content:"";position:absolute;left:-1.1em;top:.62em;width:.42em;height:.42em;
+  border-radius:50%;background:var(--terracotta)}
+.light li{color:#4a4048} .dark li,.aubergine li,.sage li{color:rgba(255,250,245,.84)}
+
+.tier{display:inline-block;font-family:var(--sans);font-size:.6em;font-weight:600;
+  padding:1px 7px;border-radius:3px;letter-spacing:.5px;vertical-align:middle;
+  background:rgba(129,154,156,.28);color:var(--sage-deep)}
+.dark .tier,.aubergine .tier,.sage .tier{background:rgba(201,168,71,.22);color:var(--gold)}
+
+.stats{display:flex;gap:4vw;flex-wrap:wrap;margin-top:4vh}
+.stat .v{font-family:var(--serif);font-size:clamp(34px,5.2vw,74px);font-weight:500;line-height:1}
+.light .stat .v{color:var(--aubergine)} .dark .stat .v,.aubergine .stat .v{color:var(--gold)}
+.sage .stat .v{color:var(--cream)}
+.stat .l{font-size:clamp(11px,1.2vw,14px);margin-top:1vh;max-width:11em;line-height:1.4}
+.light .stat .l{color:var(--dim)} .dark .stat .l,.aubergine .stat .l,.sage .stat .l{color:rgba(255,250,245,.62)}
+
+.pull{font-family:var(--serif);font-size:clamp(26px,3.6vw,52px);line-height:1.28;max-width:19em}
+
+/* timeline */
+.timeline{margin-top:2vh;max-width:42em}
+.tl{display:flex;gap:2.5vw;padding:1.5vh 0;border-bottom:1px solid rgba(255,255,255,.13)}
+.tl .y{font-family:var(--serif);font-weight:600;font-size:clamp(20px,2.6vw,34px);min-width:2.7em}
+.dark .tl .y,.aubergine .tl .y{color:var(--gold)}
+.tl .t{font-size:clamp(13px,1.6vw,19px);align-self:center;line-height:1.4}
+
+/* charts */
+.chartwrap{margin-top:3vh}
+svg.chart{width:100%;max-width:62vw;height:auto;display:block}
+
+/* meters */
+.meters{margin-top:2vh;max-width:32em}
+.meter{margin:2.4vh 0}
+.meter .ml{display:flex;justify-content:space-between;font-size:clamp(12px,1.4vw,16px);
+  margin-bottom:.8vh;color:rgba(255,250,245,.7)}
+.meter .track{height:9px;border-radius:5px;background:rgba(255,255,255,.13);overflow:hidden}
+.meter .fill{height:100%;width:0;border-radius:5px;background:linear-gradient(90deg,var(--terracotta),var(--gold));
+  transition:width 1.1s cubic-bezier(.2,.7,.2,1);}
+.slide.active .meter .fill{width:var(--w);}
+
+/* network */
+#netgraph{width:100%;max-width:60vw;height:54vh;}
+#netgraph circle{cursor:default}
+.netlabel{font-family:var(--sans);font-size:10px;fill:rgba(255,250,245,.72)}
+
+/* chrome */
+#bar{position:fixed;top:0;left:0;height:3px;background:var(--terracotta);z-index:60;
+  transition:width .4s ease;width:0}
+#nav{position:fixed;bottom:3.2vh;right:4vw;display:flex;align-items:center;gap:14px;
+  font-family:var(--sans);font-size:12px;z-index:60}
+#nav .count{font-variant-numeric:tabular-nums;letter-spacing:1px}
+.light~#nav,#nav.onlight{color:var(--dim)}
+#nav{color:rgba(255,250,245,.55)}
+#nav button{background:none;border:1.5px solid currentColor;color:inherit;
+  width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:15px;
+  display:flex;align-items:center;justify-content:center;transition:.2s}
+#nav button:hover{color:var(--terracotta);transform:scale(1.08)}
+.hint{position:fixed;bottom:3.4vh;left:4vw;font-size:11px;font-family:var(--sans);
+  color:rgba(255,250,245,.4);z-index:60}
+.titlebg{position:absolute;inset:0;overflow:hidden;z-index:0}
+.titlebg canvas{width:100%;height:100%;display:block}
+.slide>*{position:relative;z-index:1}
+</style>
+</head>
+<body>
+
+<div id="bar"></div>
+
+<!-- 1 TITLE -->
+<section class="slide dark" data-bg="net">
+  <div class="titlebg"><canvas id="titlecanvas"></canvas></div>
+  <div class="kicker reveal">A Forensic Investigation &middot; Dr. Ian Helfrich &middot; May 2026</div>
+  <h1 class="reveal">Soho House.<br>What the <em>numbers</em> say.</h1>
+  <div class="lead reveal" style="margin-top:4vh">An independent, primary-source investigation into the firm, its money, its owners, and its real estate.</div>
+</section>
+
+<!-- 2 METHODOLOGY -->
+<section class="slide light">
+  <div class="kicker reveal">Method &amp; disclaimer</div>
+  <h2 class="reveal">Evidence, tiered. Not allegation.</h2>
+  <p class="reveal">This is analysis of <strong>public records</strong>: 303 SEC filings, NYC and UK property registries, the take-private proxy, the corporate-charges registers. It was built with six custom forensic tools under one rule.</p>
+  <p class="reveal">Every claim is tiered: <strong>T1</strong> verified against a primary source, <strong>T2</strong> strong, <strong>T3</strong> a lead, <strong>T4</strong> interpretation. Nothing here alleges a crime. The findings concern structure and power, not wrongdoing, and the careful framing is deliberate.</p>
+</section>
+
+<!-- 3 THESIS -->
+<section class="slide sage">
+  <div class="kicker reveal">The thesis</div>
+  <div class="pull reveal">A loved brand, wrapped around a company structured so that a measurable stream of member money flows, as rent, to its own controlling shareholder. In January 2026 that shareholder took it private, ending the disclosure that showed it.</div>
+</section>
+
+<!-- 4 NUMBERS -->
+<section class="slide light">
+  <div class="kicker reveal">The company in numbers</div>
+  <h2 class="reveal">A brand that works. A business that doesn't.</h2>
+  <div class="stats reveal">
+    <div class="stat"><div class="v">1995</div><div class="l">Founded, 40 Greek Street, London</div></div>
+    <div class="stat"><div class="v">48</div><div class="l">Houses worldwide by 2026</div></div>
+    <div class="stat"><div class="v">$1.2B</div><div class="l">FY2024 revenue</div></div>
+    <div class="stat"><div class="v">$0</div><div class="l">Clean GAAP profit, ever</div></div>
+  </div>
+</section>
+
+<!-- 5 TIMELINE -->
+<section class="slide aubergine">
+  <div class="kicker reveal">The story</div>
+  <h2 class="reveal">Four owners, one round trip.</h2>
+  <div class="timeline reveal">
+    <div class="tl"><div class="y">1995</div><div class="t">Nick Jones opens the first house</div></div>
+    <div class="tl"><div class="y">2008</div><div class="t">Richard Caring buys 80% (~&pound;105M)</div></div>
+    <div class="tl"><div class="y">2012</div><div class="t">Ron Burkle's Yucaipa takes control</div></div>
+    <div class="tl"><div class="y">2021</div><div class="t">IPO on the NYSE at $14</div></div>
+    <div class="tl"><div class="y">2026</div><div class="t">Taken private by Yucaipa at $9</div></div>
+  </div>
+</section>
+
+<!-- 6 ROUND-TRIP CHART -->
+<section class="slide dark">
+  <div class="kicker reveal">The round trip</div>
+  <h2 class="reveal">Floated at $14. Bought back at $9.</h2>
+  <div class="chartwrap reveal"><svg class="chart" id="priceChart" viewBox="0 0 900 360"></svg></div>
+  <p class="reveal" style="font-size:.86em">The same controlling shareholder floated the company and then repurchased it. The public minority took the round trip. <span class="tier">T1</span></p>
+</section>
+
+<!-- 7 SPINE FINDING -->
+<section class="slide light">
+  <div class="kicker reveal">The central finding</div>
+  <h2 class="reveal">The controlling shareholder is the landlord.</h2>
+  <p class="reveal">From Soho House's own FY2024 10-K, Note 19: the company leases <strong>seven properties from entities affiliated with The Yucaipa Companies</strong>, the firm of controlling shareholder Ron Burkle.</p>
+  <div class="stats reveal">
+    <div class="stat"><div class="v">~$22M</div><div class="l">Annual rent to Yucaipa-affiliated landlords</div></div>
+    <div class="stat"><div class="v">$31M</div><div class="l">Related-party receivable, FY2024</div></div>
+    <div class="stat"><div class="v">7</div><div class="l">Related-party leases disclosed</div></div>
+  </div>
+  <p class="reveal" style="font-size:.84em"><span class="tier">T1</span> &nbsp;Disclosed and legal. The finding is structural, not criminal: a portion of member dues is rent to the controlling shareholder.</p>
+</section>
+
+<!-- 8 FINANCIALS -->
+<section class="slide dark">
+  <div class="kicker reveal">The money</div>
+  <h2 class="reveal">The headline metric survived a fight with the SEC.</h2>
+  <ul>
+    <li class="reveal">Never a GAAP profit. FY2024 net loss <strong>$164M</strong>. <span class="tier">T1</span></li>
+    <li class="reveal">FY2024 Adjusted EBITDA <strong>$131.9M</strong>, built on roughly $97M of add-backs. <span class="tier">T1</span></li>
+    <li class="reveal">In its 2021 pre-IPO review the SEC <strong>forced three add-backs out</strong> of that metric, two over the company's written objection. <span class="tier">T1</span></li>
+    <li class="reveal">Forensic scores: Beneish M crossed the academic manipulation threshold in FY2023; Altman Z in the distress zone every public year. <span class="tier">T1</span></li>
+  </ul>
+</section>
+
+<!-- 9 ARPU CHART -->
+<section class="slide light">
+  <div class="kicker reveal">The member economics</div>
+  <h2 class="reveal">Paying more to get in. Spending less inside.</h2>
+  <div class="chartwrap reveal"><svg class="chart" id="arpuChart" viewBox="0 0 900 380"></svg></div>
+  <p class="reveal" style="font-size:.86em">The operational signature of price running ahead of perceived value. <span class="tier">T2</span></p>
+</section>
+
+<!-- 10 TAKE-PRIVATE -->
+<section class="slide aubergine">
+  <div class="kicker reveal">The take-private</div>
+  <h2 class="reveal">A price fixed early, a vote that was a formality.</h2>
+  <ul>
+    <li class="reveal">The $9.00 price was reached <strong>August 2024</strong>, seventeen months before close, and never moved. <span class="tier">T1</span></li>
+    <li class="reveal">The Reinvestment Stockholders held <strong>97.8% of the voting power</strong>, bound to vote yes. <span class="tier">T1</span></li>
+    <li class="reveal">Morgan Stanley's own sum-of-the-parts analysis valued the shares at <strong>$5.77 to $7.85</strong>, below the deal price. <span class="tier">T1</span></li>
+  </ul>
+</section>
+
+<!-- 11 UK DEBT -->
+<section class="slide sage">
+  <div class="kicker reveal">The UK layer</div>
+  <h2 class="reveal">The debt history, read off the public register.</h2>
+  <p class="reveal">The UK Companies House charges register records every mortgage over the British operating entities: <strong>Bank of Scotland</strong> in the Caring years, then <strong>Wells Fargo</strong>, then <strong>Glas Trust</strong>.</p>
+  <p class="reveal">The take-private financing is visible: a cluster of new charges registered across the UK entities on <strong>29 January 2026, the exact closing date.</strong> <span class="tier">T1</span></p>
+</section>
+
+<!-- 12 ABU DHABI -->
+<section class="slide dark">
+  <div class="kicker reveal">The Abu Dhabi dimension</div>
+  <h2 class="reveal">A director of Soho House now runs its competitor.</h2>
+  <p class="reveal">In April 2026, Abu Dhabi's International Holding Company, through its hospitality arm <strong>DIAFA</strong>, bought a majority of Richard Caring's <em>separate</em> empire, the Ivy Collection and the Birley Clubs including Annabel's, for about &pound;1.4bn. <span class="tier">T1</span></p>
+  <p class="reveal"><strong>Soho House was not part of that deal.</strong> But Caring sits on Soho House's board and now chairs the Abu Dhabi vehicle that owns Soho House's storied London competitors. A conflict of position, not shared ownership.</p>
+</section>
+
+<!-- 13 NETWORK -->
+<section class="slide dark">
+  <div class="kicker reveal">The network</div>
+  <h2 class="reveal" style="margin-bottom:1vh">A concentrated structure, not a web.</h2>
+  <svg id="netgraph" class="reveal"></svg>
+  <p class="reveal" style="font-size:.82em;margin-top:.5vh">Competitors are structural islands. The single bridge is one person: Richard Caring. <span class="tier">T2</span></p>
+</section>
+
+<!-- 14 BRAND -->
+<section class="slide light">
+  <div class="kicker reveal">The brand</div>
+  <h2 class="reveal">The demand is real. The value proposition is slipping.</h2>
+  <p class="reveal">Demand is not in question: the waitlist roughly doubled past 100,000; membership reached about 270,000. <span class="tier">T2</span></p>
+  <p class="reveal">But members are paying more to get in and spending less once inside. The brand still pulls; the deal inside it is thinning.</p>
+</section>
+
+<!-- 15 HONESTY -->
+<section class="slide sage">
+  <div class="kicker reveal">Intellectual honesty</div>
+  <h2 class="reveal">What this will not overclaim.</h2>
+  <p class="reveal">Nothing here is evidence of a crime. The related-party leases, the Adjusted EBITDA, the take-private: all disclosed, because the SEC required it. The finding is about <strong>structure and power</strong>.</p>
+  <p class="reveal">Red flags are catalogued as questions, never asserted as wrongdoing. One propagated error was caught and corrected on the record. That correction is part of the method.</p>
+</section>
+
+<!-- 16 ASSESSMENT -->
+<section class="slide dark">
+  <div class="kicker reveal">The assessment</div>
+  <h2 class="reveal">Soho House, on the meters.</h2>
+  <div class="meters reveal">
+    <div class="meter"><div class="ml"><span>Sketchy</span><span>Upstanding</span></div><div class="track"><div class="fill" style="--w:35%"></div></div></div>
+    <div class="meter"><div class="ml"><span>Money pit (as a business)</span><span>Cash cow (for the owner)</span></div><div class="track"><div class="fill" style="--w:62%"></div></div></div>
+    <div class="meter"><div class="ml"><span>Opaque, and going darker</span><span>Transparent</span></div><div class="track"><div class="fill" style="--w:30%"></div></div></div>
+    <div class="meter"><div class="ml"><span>Weak</span><span>Brand strength</span></div><div class="track"><div class="fill" style="--w:80%"></div></div></div>
+    <div class="meter"><div class="ml"><span>Captured</span><span>Governance independence</span></div><div class="track"><div class="fill" style="--w:20%"></div></div></div>
+  </div>
+</section>
+
+<!-- 17 CLOSE -->
+<section class="slide aubergine">
+  <div class="kicker reveal">In one line</div>
+  <div class="pull reveal">It is not a fraud. It is not clean. It is aggressive controlling-shareholder capitalism, executed within the rules, and now taken private so the rules stop applying.</div>
+</section>
+
+<div id="nav">
+  <button id="prev" aria-label="previous">&larr;</button>
+  <span class="count"><span id="cur">1</span> / <span id="tot">17</span></span>
+  <button id="next" aria-label="next">&rarr;</button>
+</div>
+<div class="hint">arrow keys, space, or click to navigate</div>
+
+<script>
+const slides=[...document.querySelectorAll('.slide')];
+let i=0, drawn={};
+const bar=document.getElementById('bar'), cur=document.getElementById('cur');
+document.getElementById('tot').textContent=slides.length;
+
+function show(n){
+  const old=i;
+  i=Math.max(0,Math.min(slides.length-1,n));
+  slides.forEach((s,x)=>{
+    s.classList.toggle('active',x===i);
+    s.classList.toggle('prev',x<i);
+  });
+  bar.style.width=((i+1)/slides.length*100)+'%';
+  cur.textContent=i+1;
+  const draws={5:drawPrice,8:drawArpu,12:drawNetwork};
+  if(draws[i] && !drawn[i]){ setTimeout(()=>{draws[i]();drawn[i]=1;},420); }
+}
+document.getElementById('next').onclick=(e)=>{e.stopPropagation();show(i+1);};
+document.getElementById('prev').onclick=(e)=>{e.stopPropagation();show(i-1);};
+addEventListener('keydown',(e)=>{
+  if(['ArrowRight',' ','PageDown'].includes(e.key)){e.preventDefault();show(i+1);}
+  if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();show(i-1);}
+  if(e.key==='Home')show(0); if(e.key==='End')show(slides.length-1);
+});
+addEventListener('click',(e)=>{ if(!e.target.closest('#nav')){ e.clientX>innerWidth*0.5?show(i+1):show(i-1); }});
+
+/* ---- title canvas: slow network motif ---- */
+(function(){
+  const c=document.getElementById('titlecanvas'); if(!c) return;
+  const ctx=c.getContext('2d'); let W,H,pts;
+  function init(){
+    W=c.width=c.offsetWidth; H=c.height=c.offsetHeight;
+    pts=Array.from({length:38},()=>({x:Math.random()*W,y:Math.random()*H,
+      vx:(Math.random()-.5)*.22,vy:(Math.random()-.5)*.22}));
+  }
+  function frame(){
+    ctx.clearRect(0,0,W,H);
+    for(const p of pts){p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0||p.x>W)p.vx*=-1; if(p.y<0||p.y>H)p.vy*=-1;}
+    for(let a=0;a<pts.length;a++)for(let b=a+1;b<pts.length;b++){
+      const dx=pts[a].x-pts[b].x,dy=pts[a].y-pts[b].y,d=Math.hypot(dx,dy);
+      if(d<160){ctx.strokeStyle='rgba(201,168,71,'+(0.13*(1-d/160))+')';
+        ctx.beginPath();ctx.moveTo(pts[a].x,pts[a].y);ctx.lineTo(pts[b].x,pts[b].y);ctx.stroke();}
+    }
+    for(const p of pts){ctx.fillStyle='rgba(129,154,156,.5)';
+      ctx.beginPath();ctx.arc(p.x,p.y,1.7,0,7);ctx.fill();}
+    requestAnimationFrame(frame);
+  }
+  init(); addEventListener('resize',init); frame();
+})();
+
+/* ---- price round-trip chart ---- */
+function drawPrice(){
+  const svg=document.getElementById('priceChart'), W=900,H=360,pad=56;
+  const pts=[ {l:'IPO Jul 2021',v:14.0},{l:'',v:8.8},{l:'2022',v:4.1},
+    {l:'Glasshouse Feb 2024',v:4.9},{l:'',v:6.4},{l:'Take-private Jan 2026',v:9.0} ];
+  const yMin=0,yMax=15;
+  const x=k=>pad+k*((W-pad*2)/(pts.length-1));
+  const y=v=>H-pad-((v-yMin)/(yMax-yMin))*(H-pad*2);
+  let s='';
+  [0,5,10,15].forEach(g=>{s+=`<line x1="${pad}" x2="${W-pad}" y1="${y(g)}" y2="${y(g)}" stroke="rgba(255,255,255,.08)"/>`+
+    `<text x="${pad-10}" y="${y(g)+4}" fill="rgba(255,250,245,.4)" font-size="11" text-anchor="end">$${g}</text>`;});
+  const path=pts.map((p,k)=>`${k?'L':'M'} ${x(k)} ${y(p.v)}`).join(' ');
+  s+=`<path d="${path}" fill="none" stroke="#d06b55" stroke-width="3" stroke-linecap="round"
+        stroke-dasharray="2200" stroke-dashoffset="2200">
+       <animate attributeName="stroke-dashoffset" to="0" dur="1.8s" fill="freeze" calcMode="spline"
+         keySplines="0.2 0.7 0.2 1" keyTimes="0;1" values="2200;0"/></path>`;
+  pts.forEach((p,k)=>{
+    const last=k===pts.length-1, first=k===0;
+    s+=`<circle cx="${x(k)}" cy="${y(p.v)}" r="0" fill="${first||last?'#c9a847':'#d06b55'}">
+        <animate attributeName="r" to="${first||last?7:4.5}" dur=".4s" begin="${1.4+k*.06}s" fill="freeze"/></circle>`;
+    if(p.l){
+      // edge points anchor inward so labels never clip the SVG box.
+      const anchor=first?'start':last?'end':'middle';
+      const below=!first && !(p.v>9);
+      const ly1=below?y(p.v)+24:y(p.v)-18, ly2=below?y(p.v)+42:y(p.v)-36;
+      s+=`<text x="${x(k)}" y="${ly1}" fill="rgba(255,250,245,.75)" font-size="12"
+      text-anchor="${anchor}" opacity="0"><animate attributeName="opacity" to="1" dur=".5s" begin="${1.8+k*.06}s" fill="freeze"/>${p.l}</text>`;
+      s+=`<text x="${x(k)}" y="${ly2}" fill="#c9a847" font-size="13" font-weight="600"
+      text-anchor="${anchor}" opacity="0"><animate attributeName="opacity" to="1" dur=".5s" begin="${1.9+k*.06}s" fill="freeze"/>$${p.v.toFixed(2)}</text>`;}
+  });
+  svg.innerHTML=s;
+}
+
+/* ---- ARPU divergence chart ---- */
+function drawArpu(){
+  const svg=document.getElementById('arpuChart'), W=900,H=380,pad=64;
+  const yr=['FY2022','FY2023','FY2024'];
+  const dues=[100,109,117], inh=[100,97,91];
+  const yMin=82,yMax=122;
+  const x=k=>pad+k*((W-pad*2)/2);
+  const y=v=>H-pad-((v-yMin)/(yMax-yMin))*(H-pad*2);
+  let s=`<line x1="${pad}" x2="${W-pad}" y1="${y(100)}" y2="${y(100)}" stroke="rgba(0,0,0,.12)"/>`+
+        `<text x="${pad}" y="${y(100)-8}" fill="#8a8088" font-size="11">FY2022 = 100</text>`;
+  function line(arr,col,lab,labY){
+    const p=arr.map((v,k)=>`${k?'L':'M'} ${x(k)} ${y(v)}`).join(' ');
+    let o=`<path d="${p}" fill="none" stroke="${col}" stroke-width="3.4" stroke-linecap="round"
+      stroke-dasharray="1400" stroke-dashoffset="1400">
+      <animate attributeName="stroke-dashoffset" to="0" dur="1.5s" fill="freeze"
+       calcMode="spline" keySplines="0.2 0.7 0.2 1" keyTimes="0;1" values="1400;0"/></path>`;
+    arr.forEach((v,k)=>o+=`<circle cx="${x(k)}" cy="${y(v)}" r="0" fill="${col}">
+      <animate attributeName="r" to="6" dur=".4s" begin="${1.1+k*.12}s" fill="freeze"/></circle>`);
+    o+=`<text x="${x(2)-12}" y="${labY}" fill="${col}" font-size="15" font-weight="600" text-anchor="end"
+      opacity="0"><animate attributeName="opacity" to="1" dur=".6s" begin="1.5s" fill="freeze"/>${lab}</text>`;
+    return o;
+  }
+  s+=line(dues,'#432d38','Dues per member  +17%',y(117)-16);
+  s+=line(inh,'#d06b55','In-house spend per member  -9%',y(91)+26);
+  yr.forEach((t,k)=>s+=`<text x="${x(k)}" y="${H-26}" fill="#8a8088" font-size="13" text-anchor="middle">${t}</text>`);
+  svg.innerHTML=s;
+}
+
+/* ---- D3 network mini-graph ---- */
+function drawNetwork(){
+  const nodes=[
+    {id:'shc',label:'Soho House',grp:'core',r:26},
+    {id:'burkle',label:'Ron Burkle',grp:'yucaipa',r:17},
+    {id:'yucaipa',label:'Yucaipa',grp:'yucaipa',r:19},
+    {id:'caring',label:'Richard Caring',grp:'hinge',r:18},
+    {id:'ehp',label:'EH Parent LLC',grp:'yucaipa',r:13},
+    {id:'morse',label:'Tyler Morse / MCR',grp:'yucaipa',r:13},
+    {id:'apollo',label:'Apollo',grp:'yucaipa',r:12},
+    {id:'gs',label:'Goldman Sachs',grp:'yucaipa',r:12},
+    {id:'ihc',label:'IHC (Abu Dhabi)',grp:'ihc',r:18},
+    {id:'diafa',label:'DIAFA',grp:'ihc',r:14},
+    {id:'tahnoon',label:'Sheikh Tahnoon',grp:'ihc',r:13},
+    {id:'birley',label:"Birley / Annabel's",grp:'ihc',r:13},
+    {id:'ivy',label:'The Ivy Collection',grp:'ihc',r:11},
+    {id:'zzs',label:"ZZ's Club",grp:'island',r:10},
+    {id:'casa',label:'Casa Cipriani',grp:'island',r:10},
+    {id:'neue',label:'NeueHouse',grp:'island',r:10},
+    {id:'ned',label:'The Ned',grp:'yucaipa',r:11},
+  ];
+  const links=[
+    ['burkle','yucaipa'],['yucaipa','shc'],['burkle','shc'],['yucaipa','ehp'],
+    ['ehp','shc'],['morse','shc'],['apollo','shc'],['gs','shc'],['yucaipa','ned'],
+    ['ned','shc'],['caring','shc'],['caring','diafa'],['diafa','ihc'],
+    ['tahnoon','ihc'],['diafa','birley'],['diafa','ivy'],['caring','birley'],
+  ];
+  const color={core:'#c9a847',yucaipa:'#819a9c',hinge:'#d06b55',ihc:'#e0857a',island:'#6f6f78'};
+  const svg=d3.select('#netgraph');
+  // fixed coordinate space so the graph renders regardless of layout timing
+  const W=1000, H=520;
+  svg.attr('viewBox',`0 0 ${W} ${H}`).attr('preserveAspectRatio','xMidYMid meet')
+     .selectAll('*').remove();
+  const linkData=links.map(l=>({source:l[0],target:l[1]}));
+  // settle the layout synchronously: requestAnimationFrame is paused on a
+  // hidden tab, so an auto-ticking simulation would never render. tick by hand.
+  const sim=d3.forceSimulation(nodes)
+    .force('link',d3.forceLink(linkData).id(d=>d.id).distance(78).strength(.5))
+    .force('charge',d3.forceManyBody().strength(-340))
+    .force('center',d3.forceCenter(W/2,H/2))
+    .force('collide',d3.forceCollide().radius(d=>d.r+16))
+    .stop();
+  for(let k=0;k<320;k++) sim.tick();
+  const m=52;
+  nodes.forEach(d=>{ d.x=Math.max(m,Math.min(W-m,d.x)); d.y=Math.max(m,Math.min(H-m,d.y)); });
+  svg.append('g').selectAll('line').data(linkData).join('line')
+    .attr('stroke','rgba(255,250,245,.22)').attr('stroke-width',1.4)
+    .attr('x1',d=>d.source.x).attr('y1',d=>d.source.y)
+    .attr('x2',d=>d.target.x).attr('y2',d=>d.target.y);
+  const g=svg.append('g').selectAll('g').data(nodes).join('g')
+    .attr('transform',d=>`translate(${d.x},${d.y})`);
+  g.append('circle').attr('r',d=>d.r).attr('fill',d=>color[d.grp])
+    .attr('stroke','#241820').attr('stroke-width',2);
+  g.append('text').text(d=>d.label).attr('class','netlabel')
+    .attr('text-anchor','middle').attr('dy',d=>d.r+13);
+}
+
+show(0);
+</script>
+</body>
+</html>
