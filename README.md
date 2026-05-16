@@ -15,5 +15,5 @@ Navigate with arrow keys, space, or by clicking the left/right half of the page.
 
 ## Hosting
 
-Private repository with a GitHub Pages site. The published site is reachable by
-anyone with the URL but is not linked or indexed.
+Public repository served via GitHub Pages at
+https://ihelfrich.github.io/soho-house-deck/
