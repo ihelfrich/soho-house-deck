@@ -193,11 +193,11 @@ svg.chart{width:100%;max-width:62vw;height:auto;display:block}
 <section class="slide light">
   <div class="kicker reveal">The central finding</div>
   <h2 class="reveal">The controlling shareholder is the landlord.</h2>
-  <p class="reveal">From Soho House's own FY2024 10-K, Note 19: the company leases <strong>seven properties from entities affiliated with The Yucaipa Companies</strong>, the firm of controlling shareholder Ron Burkle.</p>
+  <p class="reveal">From Soho House's own FY2024 10-K, Note 19: the company leases <strong>properties from entities affiliated with The Yucaipa Companies</strong>, the firm of controlling shareholder Ron Burkle. There were eight such leases at the FY2023 year-end; Yucaipa has been selling those affiliates down since.</p>
   <div class="stats reveal">
     <div class="stat"><div class="v">~$22M</div><div class="l">Annual rent to Yucaipa-affiliated landlords</div></div>
     <div class="stat"><div class="v">$31M</div><div class="l">Related-party receivable, FY2024</div></div>
-    <div class="stat"><div class="v">7</div><div class="l">Related-party leases disclosed</div></div>
+    <div class="stat"><div class="v">8</div><div class="l">Yucaipa-affiliated leases at the FY2023 year-end</div></div>
   </div>
   <p class="reveal" style="font-size:.84em"><span class="tier">T1</span> &nbsp;Disclosed and legal. The finding is structural, not criminal: a portion of member dues is rent to the controlling shareholder.</p>
 </section>
@@ -210,7 +210,7 @@ svg.chart{width:100%;max-width:62vw;height:auto;display:block}
     <li class="reveal">Never a GAAP profit. FY2024 net loss <strong>$164M</strong>. <span class="tier">T1</span></li>
     <li class="reveal">FY2024 Adjusted EBITDA <strong>$131.9M</strong>, built on roughly $97M of add-backs. <span class="tier">T1</span></li>
     <li class="reveal">In its 2021 pre-IPO review the SEC <strong>forced three add-backs out</strong> of that metric, two over the company's written objection. <span class="tier">T1</span></li>
-    <li class="reveal">Forensic scores: Beneish M crossed the academic manipulation threshold in FY2023; Altman Z in the distress zone every public year. <span class="tier">T1</span></li>
+    <li class="reveal">Forensic scores: Beneish M crossed the academic manipulation threshold in FY2023, Altman Z sat in the distress zone every public year. Tool-computed leads, not verdicts. <span class="tier">T3</span></li>
   </ul>
 </section>
 
@@ -354,8 +354,8 @@ addEventListener('click',(e)=>{ if(!e.target.closest('#nav')){ e.clientX>innerWi
 /* ---- price round-trip chart ---- */
 function drawPrice(){
   const svg=document.getElementById('priceChart'), W=900,H=360,pad=56;
-  const pts=[ {l:'IPO Jul 2021',v:14.0},{l:'',v:8.8},{l:'2022',v:4.1},
-    {l:'Glasshouse Feb 2024',v:4.9},{l:'',v:6.4},{l:'Take-private Jan 2026',v:9.0} ];
+  const pts=[ {l:'IPO Jul 2021',v:14.0},{l:'',v:8.8},{l:'2022 low',v:3.08},
+    {l:'Glasshouse Feb 2024',v:5.0},{l:'',v:6.4},{l:'Take-private Jan 2026',v:9.0} ];
   const yMin=0,yMax=15;
   const x=k=>pad+k*((W-pad*2)/(pts.length-1));
   const y=v=>H-pad-((v-yMin)/(yMax-yMin))*(H-pad*2);
